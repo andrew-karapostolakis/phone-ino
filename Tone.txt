@@ -1,0 +1,66 @@
+//A Karapostolakis
+//2017-06-02
+//The Tone class plays two tones simultaeously on one speaker.
+//This class was adapted from public domain code written by David Dubins.
+//Original code can be found at https://playground.arduino.cc/Main/DTMF
+
+long tone1StartTime;
+long tone2StartTime;
+int tone1Duration;
+int tone2Duration;
+boolean tone1High;
+boolean tone2High;
+boolean playTone;
+int speakerPin1;
+int speakerPin2;
+
+Tone(int pin1, int pin2) {
+  speakerPin1 = pin1;
+  pinMode(speakerPin1, OUTPUT);
+  speakerPin2 = pin2;
+  pinMode(speakerPin2, OUTPUT);
+  playTone = false;
+}
+
+//Begins playing a new tone
+void startTone(int tone1, int tone2) {
+  playTone = true;
+  //both tones start off
+  tone1High = false;
+  tone2High = false;
+  //set toggle time for each tone in microseconds (for square wave, switch between high and low every half a period)
+  tone1Duration = 500000/tone1;
+  tone2Duration = 500000/tone2;
+  //set start times for each tone cycle
+  tone1StartTime = micros();
+  tone2StartTime = micros();
+}
+
+//Continues playing the current tone
+void continueTone() {
+  if (playTone) {
+    //if half of tone1's period has passed
+    if (micros() - tone1StartTime > tone1Duration) {
+      //reset timer
+      tone1StartTime = micros();
+      //toggle tone1, update output
+      tone1High = !tone1High;
+      digitalWrite(speakerPin1, tone1High);
+    }
+    //if half of tone2's period has passed
+    if (micros() - tone2StartTime > tone2Duration) {
+      //reset timer
+      tone2StartTime = micros();
+      //toggle tone2, update output
+      tone2High = !tone2High;
+      digitalWrite(speakerPin2, tone2High);
+    }
+  }
+}
+
+//Stops the current tone
+void stopTone() {
+  playTone = false;
+  digitalWrite(speakerPin1, LOW);
+  digitalWrite(speakerPin2, LOW);
+}
